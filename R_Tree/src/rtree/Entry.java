@@ -1,10 +1,11 @@
 package rtree;
 
 
-public class Entry extends Node {
-	
-	public Entry(float[] point) {
-		super(point, true);
+public class Entry<T> extends Node {
+	public final T entry;
+	public Entry(double x, double y, T entry) {
+		super(x,x,y,y, true);
+		this.entry = entry;
 		
 	}
 	public String toString() {
