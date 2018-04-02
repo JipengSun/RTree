@@ -1,7 +1,5 @@
 package rtree;
 
-import javax.print.attribute.Size2DSyntax;
-
 public class Rtree {
 	private int M;
 	private int min = (int) Math.ceil(M*0.4);
@@ -13,6 +11,9 @@ public class Rtree {
 		this.M = M;
 	
 		
+	}
+	public void setRoot(Node a) {
+		this.root = a;
 	}
 	public int rangequery(Node u, double x1, double x2, double y1, double y2,int count) {
 		if (u.isLeaf == true) {
@@ -83,7 +84,14 @@ public class Rtree {
 		
 	}
 	public void handleoverflow(Node u) {
-		
+		Node u1 = u.split();
+		if (u.getParent()==null) {
+			
+		}
+		else {
+			Node w = u.getParent();
+			
+		}
 		}
 	
 

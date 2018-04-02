@@ -9,7 +9,7 @@ public class Entry extends Node {
 		
 	}
 	public String toString() {
-		return "Entry"+ MBR[0];
+		return "Entry"+ MBR[0]+MBR[2];
 		
 	}
 
