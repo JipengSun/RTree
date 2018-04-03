@@ -6,15 +6,29 @@ public class Rtree {
 	private Node root;
 	
 	
-	public Rtree(final int M) {
-		// TODO Auto-generated constructor stub
+	public Rtree(final int M, Entry first) {
+		// Create a leaf node for the first entry and let the node be the root.
 		this.M = M;
+		this.root = createRoot(first);
 	
 		
 	}
+	public Node getRoot() {
+		return root;
+	}
+	
+	public Node createRoot(Entry e) {
+		Node root = new Node(e.getMBR()[0], e.getMBR()[1], e.getMBR()[2], e.getMBR()[3], true);
+		root.getEntry().add(e);
+		root.setParent(null);
+		e.setParent(root);
+		return root;
+	}
+	
 	public void setRoot(Node a) {
 		this.root = a;
 	}
+	
 	public int rangequery(Node u, double x1, double x2, double y1, double y2,int count) {
 		if (u.isLeaf == true) {
 			int en = u.getEntry().size();
@@ -42,10 +56,11 @@ public class Rtree {
 			if(u.getEntry().size()>M) {
 				handleoverflow(u);
 			}
-			else {
-				Node v = choose_subtree(u,p);
-				insert(v, p);
-			}
+
+		}
+		else {
+			Node v = choose_subtree(u,p);
+			insert(v, p);
 		}
 	}
 	public void updateMBR(Node u,Node p) {
@@ -86,11 +101,36 @@ public class Rtree {
 	public void handleoverflow(Node u) {
 		Node u1 = u.split();
 		if (u.getParent()==null) {
-			
+			// Create new root and add u,u1 as its children. 
+			// Note that the current 'root' number is and only is 2, can't be more since the only way to create root Node
+			// after the first insertion is splitting. And if current root split to two parts, then the algorithm will
+			// generate a new root to contain two nodes. So the root number is back to 1 again.
+			double[] newMBR = new double[4];
+			newMBR[0] = Math.min(u.getMBR()[0], u1.getMBR()[0]);
+			newMBR[1] = Math.max(u.getMBR()[1], u1.getMBR()[1]);
+			newMBR[2] = Math.min(u.getMBR()[2], u1.getMBR()[2]);
+			newMBR[3] = Math.max(u.getMBR()[3], u1.getMBR()[3]);
+			Node root1 = new Node(newMBR[0], newMBR[1], newMBR[2], newMBR[3], false);
+			root = root1;
+			root1.setParent(null);
+			root1.addChildren(u);
+			root1.addChildren(u1);
+			u.setParent(root1);
+			u1.setParent(root1);// u1's parent used to be as same as u, null.
 		}
 		else {
 			Node w = u.getParent();
-			
+			//Update w 's MBR
+			w.addChildren(u1);
+			// Note that adding new point to a node can only leads to the MBR to increase or stay the same before splitting.
+			// And even after splitting, the parent of the node is still increasing or constant.
+			// We can't know which node the inserting point belongs to, but we definitely know it must belong to u or u1.
+			// So we just update u and u1 to w, the effect is same as the update the inserted point to w.
+			updateMBR(w, u);
+			updateMBR(w, u1);
+			if(w.getChildren().size()>M) {
+				handleoverflow(w);
+			}
 		}
 		}
 	

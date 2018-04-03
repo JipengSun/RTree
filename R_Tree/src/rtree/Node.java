@@ -12,7 +12,7 @@ public class Node {
 	private ArrayList<Entry> entries;
 	protected double[] MBR = new double[4];
 	public boolean isLeaf;
-	private final int M = 4;
+	private final int M = 3;
 	private final int min = (int) Math.ceil(M*0.4);
 	
 	public Node(double left,double right,double down,double up, boolean isLeaf) {
@@ -33,6 +33,9 @@ public class Node {
 	}
 	public ArrayList<Node> getChildren(){
 		return children;
+	}
+	public void addChildren(Node child) {
+		children.add(child);
 	}
 	public ArrayList<Entry> getEntry() {
 		return entries;
@@ -248,7 +251,7 @@ public class Node {
 			double[] u1MBR = calInternalMBR(u1Node);
 			this.MBR = uMBR;
 			this.children = uNode;
-			Node u1 = new Node(u1MBR[0], u1MBR[1], u1MBR[2], u1MBR[3], true);
+			Node u1 = new Node(u1MBR[0], u1MBR[1], u1MBR[2], u1MBR[3], false);
 			u1.setParent(this.getParent());
 			u1.children = u1Node;
 			return u1;
