@@ -29,7 +29,8 @@ public class Rtree {
 		this.root = a;
 	}
 	
-	public int rangequery(Node u, double x1, double x2, double y1, double y2,int count) {
+	public int rangequery(Node u, double x1, double x2, double y1, double y2) {
+		int count = 0;
 		if (u.isLeaf == true) {
 			int en = u.getEntry().size();
 			for (int i = 0;i< en;i++) {
@@ -39,14 +40,17 @@ public class Rtree {
 			}
 			return count;
 		}
+		
 		else {
 			int size = u.getChildren().size();
 			for (int j = 0; j< size; j++) {
 				if (u.getChildren().get(j).isIntersects(x1, x2, y1, y2))
-				rangequery(u.getChildren().get(j), x1, x2, y1, y2,count);
+				count = count + rangequery(u.getChildren().get(j), x1, x2, y1, y2);
 			}
+			return count;
+			
 		}
-		return count;
+		//return count;
 	}
 	public void insert(Node u, Entry p) {
 		if(u.isLeaf) {

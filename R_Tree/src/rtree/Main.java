@@ -1,53 +1,97 @@
 package rtree;
 
-import java.util.ArrayList;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.InputStreamReader;
 
 public class Main {
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		
-		Entry entry = new Entry(2,1);
-		//System.out.println(entry);
-		//System.out.println(name1(2));
-		/*ArrayList<Entry> entries = new ArrayList<Entry>();
-		entries.add(0,new Entry(0, 1));
-		entries.add(1,new Entry(1, 100));
-		entries.add(2,new Entry(2, 3));
-		entries.add(3,new Entry(4, 5));
-		
-		Rtree rtree = new Rtree(3, entry);
-		double[] a = entry.calMBR(entries);
-		System.out.println(a[0]);
-		System.out.println(a[1]);
-		System.out.println(a[2]);
-		System.out.println(a[3]);
-		Node aNode = new Node(a[0], a[1], a[2], a[3], true);
-		aNode.setEntry(entries);
-		aNode.setParent(null);
-		Node u1 = aNode.split();
-		System.out.println(aNode.getEntry());
-		System.out.println(u1.getEntry());
-		
-		System.out.println(rtree.rangequery(aNode, 0, 2, 1, 3, 0));
-		System.out.println(entries.get(0).isIntersects(0, 2, 1, 3));
-		*/
-		Rtree rtree = new Rtree(3, entry);
-		Entry entry1 = new Entry(100,2);
-		Entry entry2 = new Entry(10,100);
-		Entry entry3 = new Entry(10,1000);
-		rtree.insert(rtree.getRoot(), entry1);
-		rtree.insert(rtree.getRoot(), entry2);
-		rtree.insert(rtree.getRoot(), entry3);
-		System.out.println(entry.getParent().getMBR()[0]);
-		System.out.println(entry.getParent().getMBR()[1]);
-		System.out.println(entry.getParent().getMBR()[2]);
-		System.out.println(entry.getParent().getMBR()[3]);
-		System.out.println(rtree.getRoot().getMBR()[0]);
-		System.out.println(rtree.getRoot().getMBR()[1]);
-		System.out.println(rtree.getRoot().getMBR()[2]);
-		System.out.println(rtree.getRoot().getMBR()[3]);
-		double[][] a= new double[3][2];
 
+		try {
+			String pathname = "./dataset.txt";
+			File filename = new File(pathname);
+			InputStreamReader reader = new InputStreamReader(new FileInputStream(filename));
+			BufferedReader br = new BufferedReader(reader);
+			// Get the total number
+			String line = "";
+			line = br.readLine();
+			int num = Integer.parseInt(line);
+			double[][] dataset = new double[num][2];
+			// Get the first data row alone to initialize the R-Tree.
+			line = br.readLine();
+			String[] StrArray = line.split(" ");
+			dataset[0][0] = Double.parseDouble(StrArray[1]);
+			dataset[0][1] = Double.parseDouble(StrArray[2]);
+			Entry e0 = new Entry(dataset[0][0], dataset[0][1]);
+			Rtree rtree = new Rtree(50, e0);
+			// Read and insert the R-Tree.
+			for(int i = 1; i<num; i++) {
+				line = br.readLine();
+				String[] StrArray1 = line.split(" ");
+				dataset[i][0] = Double.parseDouble(StrArray1[1]);
+				dataset[i][1] = Double.parseDouble(StrArray1[2]);
+				Entry ei = new Entry(dataset[i][0], dataset[i][1]);
+				rtree.insert(rtree.getRoot(), ei);
+			}
+			br.close();
+			String Querypathname = "./test_query.txt";
+			File Queryfilename = new File(Querypathname);
+			InputStreamReader reader1 = new InputStreamReader(new FileInputStream(Queryfilename));
+			BufferedReader br1 = new BufferedReader(reader1);
+			
+			
+			int testnum = 100;
+			double[][] testquery = new double[testnum][4];
+			for(int i = 0;i<testnum;i++) {
+				String line1 = "";
+				line1 = br1.readLine();
+				String[] strarray1 = line1.split(" ");
+				testquery[i][0] = Double.parseDouble(strarray1[0]);
+				testquery[i][1] = Double.parseDouble(strarray1[1]);
+				testquery[i][2] = Double.parseDouble(strarray1[2]);
+				testquery[i][3] = Double.parseDouble(strarray1[3]);
+			}
+			
+			// Start testing the sequential-scan benchmark
+			long startTime1 = System.currentTimeMillis();
+			String Datapathname = "./dataset.txt";
+			File filename2 = new File(Datapathname);
+			InputStreamReader reader2 = new InputStreamReader(new FileInputStream(filename2));
+			BufferedReader br2 = new BufferedReader(reader2);
+			String line2 = "";
+			line2 = br2.readLine();
+			while(line2!=null) {
+				line2 = br2.readLine();
+			}
+			br2.close();
+			long endTime1 = System.currentTimeMillis();
+			long sscantime = (endTime1-startTime1);
+			System.out.println("The sequential-scan benchmark is "+sscantime+"ms");
+			int [] queryresults = new int[10];
+			// Start testing the average query time
+			long startTime = System.currentTimeMillis();
+			for(int i = 0; i<testnum;i++) {
+				queryresults[i] = rtree.rangequery(rtree.getRoot(), testquery[i][0],testquery[i][1], testquery[i][2], testquery[i][3]);
+			}
+			long endTime = System.currentTimeMillis();
+			long averageQuerytime = (endTime-startTime)/testnum;
+			System.out.println("The Average Query Time is: "+averageQuerytime+"ms.");
+			System.out.println("So my R-Tree average query time is "+(sscantime/averageQuerytime)+" times faster than the sequential scan!");
+			br1.close();
+			File writename = new File("./Query_Result.txt");
+			writename.createNewFile();
+			BufferedWriter out = new BufferedWriter(new FileWriter(writename));
+			for(int i = 0;i<testnum;i++) {
+				out.write(queryresults[i]+"\r\n");
+			}
+			out.flush();
+			out.close();
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
  }
 }
