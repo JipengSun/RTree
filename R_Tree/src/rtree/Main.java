@@ -27,14 +27,17 @@ public class Main {
 			dataset[0][0] = Double.parseDouble(StrArray[1]);
 			dataset[0][1] = Double.parseDouble(StrArray[2]);
 			Entry e0 = new Entry(dataset[0][0], dataset[0][1]);
-			Rtree rtree = new Rtree(50, e0);
+			Rtree rtree = new Rtree(450, e0);
 			// Read and insert the R-Tree.
+			Entry[] entries = new Entry[num];
+			entries[0] = e0;
 			for(int i = 1; i<num; i++) {
 				line = br.readLine();
 				String[] StrArray1 = line.split(" ");
 				dataset[i][0] = Double.parseDouble(StrArray1[1]);
 				dataset[i][1] = Double.parseDouble(StrArray1[2]);
 				Entry ei = new Entry(dataset[i][0], dataset[i][1]);
+				entries[i] = ei;
 				rtree.insert(rtree.getRoot(), ei);
 			}
 			br.close();
@@ -44,7 +47,7 @@ public class Main {
 			BufferedReader br1 = new BufferedReader(reader1);
 			
 			
-			int testnum = 100;
+			int testnum = 10;
 			double[][] testquery = new double[testnum][4];
 			for(int i = 0;i<testnum;i++) {
 				String line1 = "";
@@ -57,7 +60,18 @@ public class Main {
 			}
 			
 			// Start testing the sequential-scan benchmark
-			long startTime1 = System.currentTimeMillis();
+			//long startTime1 = System.currentTimeMillis();
+			int []testresult = new int[testnum];
+			long startTime1 = System.nanoTime();
+			for (int i = 0; i<testnum;i++) {
+				for (int j = 0; j<num;j++) {
+					if (entries[j].isIntersects(testquery[i][0], testquery[i][1], testquery[i][2], testquery[i][3])) {
+						testresult[i]++;
+					}
+				}
+				//System.out.println(testresult[i]);
+			}
+			/* Test the new Bench Mark
 			String Datapathname = "./dataset.txt";
 			File filename2 = new File(Datapathname);
 			InputStreamReader reader2 = new InputStreamReader(new FileInputStream(filename2));
@@ -68,18 +82,22 @@ public class Main {
 				line2 = br2.readLine();
 			}
 			br2.close();
-			long endTime1 = System.currentTimeMillis();
-			long sscantime = (endTime1-startTime1);
-			System.out.println("The sequential-scan benchmark is "+sscantime+"ms");
+			//long endTime1 = System.currentTimeMillis();
+			 */
+			long endTime1 = System.nanoTime();
+			long sscantime = (endTime1-startTime1)/testnum;
+			System.out.println("The sequential-scan benchmark is "+sscantime+"ns");
 			int [] queryresults = new int[10];
 			// Start testing the average query time
-			long startTime = System.currentTimeMillis();
+			//long startTime = System.currentTimeMillis();
+			long startTime = System.nanoTime();
 			for(int i = 0; i<testnum;i++) {
 				queryresults[i] = rtree.rangequery(rtree.getRoot(), testquery[i][0],testquery[i][1], testquery[i][2], testquery[i][3]);
 			}
-			long endTime = System.currentTimeMillis();
+			//long endTime = System.currentTimeMillis();
+			long endTime = System.nanoTime();
 			long averageQuerytime = (endTime-startTime)/testnum;
-			System.out.println("The Average Query Time is: "+averageQuerytime+"ms.");
+			System.out.println("The Average Query Time is: "+averageQuerytime+"ns.");
 			System.out.println("So my R-Tree average query time is "+(sscantime/averageQuerytime)+" times faster than the sequential scan!");
 			br1.close();
 			File writename = new File("./Query_Result.txt");

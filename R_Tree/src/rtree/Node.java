@@ -12,7 +12,7 @@ public class Node {
 	private ArrayList<Entry> entries;
 	protected double[] MBR = new double[4];
 	public boolean isLeaf;
-	private final int M = 50;
+	private final int M = 450;
 	private final int min = (int) Math.ceil(M*0.4);
 	
 	public Node(double left,double right,double down,double up, boolean isLeaf) {
